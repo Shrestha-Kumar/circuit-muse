@@ -128,7 +128,29 @@ Design a 4-client round-robin arbiter with rotating priority pointer.
 
 Use the full web interface with syntax highlighting, copy button, and live generation.
 
-### Part A — Start the Colab Backend
+### Part A — Get the Model Weights into Your Google Drive
+
+> ⚠️ **This step is required before running the backend. The model weights are ~7GB and must be in your own Google Drive for Colab to load them.**
+
+#### Step 1: Open the shared Drive folder
+
+Click here → [Shared Drive Folder](https://drive.google.com/drive/folders/16soGM1-rpTdfOdUTXE8jxqdbKV1aLsFw?usp=drive_link)
+
+#### Step 2: Add the weights folder to your own Drive
+
+1. Inside the shared folder, find the folder named **`qwen_verilog_stage4_final`**
+2. Right-click on it → click **"Add shortcut to Drive"**
+   **OR** right-click → **"Make a copy"** to copy it fully to your Drive
+3. Make sure it appears in **My Drive** (not just Shared with me) at the path:
+   ```
+   My Drive/qwen_verilog_stage4_final/
+   ```
+
+> 💡 **Tip:** Use "Add shortcut" to save Drive storage space — it links to the original without copying the full 7GB.
+
+---
+
+### Part B — Start the Colab Backend
 
 #### Step 1: Open the Backend Notebook
 
@@ -139,19 +161,28 @@ You can open the backend notebook directly from this repository — no Drive acc
 2. Click **File → Open Notebook → GitHub**
 3. Paste: `https://github.com/Shrestha-Kumar/circuit-muse`
 4. Select `notebooks/verilog_backend.ipynb`
+5. Click **Open**
 
 **Option 2 — From Google Drive:**
 1. Go to [Google Colab](https://colab.research.google.com)
 2. Click **File → Open Notebook → Google Drive**
-3. Open `verilog_backend.ipynb` → [Click here to access the Drive folder](https://drive.google.com/drive/folders/16soGM1-rpTdfOdUTXE8jxqdbKV1aLsFw?usp=drive_link)
+3. Navigate to the [shared Drive folder](https://drive.google.com/drive/folders/16soGM1-rpTdfOdUTXE8jxqdbKV1aLsFw?usp=drive_link) and open `verilog_backend.ipynb`
 
 #### Step 2: Set Runtime to GPU
 
 - **Runtime → Change runtime type → T4 GPU → Save → Connect**
 
-#### Step 3: Run the Backend Cell
+#### Step 3: Mount Your Drive and Run the Backend Cell
 
-Wait for this output (~3-4 minutes):
+The notebook will first mount your Google Drive:
+```python
+from google.colab import drive
+drive.mount('/content/drive')
+```
+
+Click the authorization link → select your Google account → allow access.
+
+Then run the main backend cell. Wait for this output (~3-4 minutes to load model):
 
 ```
 ✅ Model loaded
@@ -181,7 +212,7 @@ Should return:
 
 ---
 
-### Part B — Run the Frontend
+### Part C — Run the Frontend
 
 #### Step 1: Clone the Repository
 
@@ -224,11 +255,11 @@ Open browser at `http://localhost:8080`
 
 ---
 
-### Part C — Deploy to GitHub Pages (Share Live Link)
+### Part D — Deploy to GitHub Pages (Share Live Link)
 
 #### Step 1: Update the URL in `useVerilogGenerator.ts`
 
-Same as Step 3 above.
+Same as Part C Step 3 above.
 
 #### Step 2: Deploy
 
@@ -248,7 +279,7 @@ https://shrestha-kumar.github.io/circuit-muse/
 
 Each session gives a **new** Cloudflare URL. Do this every restart:
 
-**1.** Re-run the backend cell → copy the new URL
+**1.** Re-run the backend cell in Colab → copy the new URL
 
 **2.** Update `frontend/src/hooks/useVerilogGenerator.ts`:
 ```typescript
@@ -265,6 +296,8 @@ cd frontend
 npm run deploy
 ```
 
+> 💡 The model weights in your Drive do **not** need to be re-downloaded. Only the Cloudflare URL changes each session.
+
 ---
 
 ## 🧪 Fine-Tuning Notebooks
@@ -277,7 +310,7 @@ The fine-tuning was done in 4 progressive stages:
 
 Each stage used QLoRA (4-bit quantization) via Unsloth on a free T4 GPU, training only 0.57% of parameters (47.5M of 8.3B) for efficient domain adaptation.
 
-> ⚠️ To reproduce training, you will need the model weights and dataset in your Google Drive. The weights are available in the [shared Drive folder](https://drive.google.com/drive/folders/16soGM1-rpTdfOdUTXE8jxqdbKV1aLsFw?usp=drive_link) and the base dataset at [smolify/smolified-krackhack26verilog](https://huggingface.co/datasets/smolify/smolified-krackhack26verilog).
+> ⚠️ To reproduce training, you will need the model weights and dataset in your Google Drive. Weights are in the [shared Drive folder](https://drive.google.com/drive/folders/16soGM1-rpTdfOdUTXE8jxqdbKV1aLsFw?usp=drive_link) and the base dataset is at [smolify/smolified-krackhack26verilog](https://huggingface.co/datasets/smolify/smolified-krackhack26verilog).
 
 ---
 
@@ -301,6 +334,12 @@ Frontend can't reach the backend. Check:
 - Is the Colab runtime still running?
 - Is the URL updated in `useVerilogGenerator.ts`?
 - Does `https://your-url.trycloudflare.com/health` return `{"status":"ok"}`?
+
+### Model not found error in Colab
+```
+OSError: /content/drive/MyDrive/qwen_verilog_stage4_final not found
+```
+The weights are not in your Drive at the correct path. Go back to **Part A** and make sure the folder is added to **My Drive** (not just Shared with me).
 
 ### Blank white screen on GitHub Pages
 Check `frontend/vite.config.ts` has:
