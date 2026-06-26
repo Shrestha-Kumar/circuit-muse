@@ -45,6 +45,15 @@ So we took the Smolify dataset as our foundation, extended it with **204 hand-cu
 
 ```
 circuit-muse/
+├── backend/                           ← FastAPI backend package (runs on Colab)
+│   ├── app/
+│   │   ├── main.py                    ← FastAPI app, CORS, lifespan
+│   │   ├── config.py                  ← Settings via pydantic-settings
+│   │   ├── schemas.py                 ← Request / response models
+│   │   ├── model_service.py           ← Unsloth model loading + inference
+│   │   └── routers/
+│   │       └── generate.py            ← /generate and /health endpoints
+│   └── requirements.txt                ← Dependencies: fastapi, torch, unsloth, transformers, accelerate
 ├── frontend/                          ← React web app
 │   ├── src/
 │   │   ├── hooks/
@@ -53,7 +62,7 @@ circuit-muse/
 │   ├── vite.config.ts
 │   └── package.json
 ├── notebooks/
-│   ├── verilog_backend.ipynb          ← Flask API + Cloudflare tunnel (run this for web frontend)
+│   ├── verilog_backend.ipynb          ← Colab notebook: installs deps, starts FastAPI + Cloudflare tunnel
 │   └── finetune_stage*.ipynb          ← Fine-tuning notebooks showing our training pipeline
 ├── python/
 │   └── inference.py                   ← Standalone Colab inference script
@@ -318,8 +327,10 @@ Each stage used QLoRA (4-bit quantization) via Unsloth on a free T4 GPU, trainin
 
 | File | Purpose | When to edit |
 |------|---------|--------------|
+| `backend/requirements.txt` | Backend dependencies (fastapi, torch, unsloth, transformers, accelerate) | Only if adding new Python packages |
 | `frontend/src/hooks/useVerilogGenerator.ts` | API URL + response parsing | Every Colab restart |
-| `notebooks/verilog_backend.ipynb` | Flask backend + Cloudflare tunnel | Never — just run it |
+| `backend/app/main.py` | FastAPI app entry point | Never — just run the notebook |
+| `notebooks/verilog_backend.ipynb` | Installs deps, starts FastAPI + tunnel | Never — just run it |
 | `notebooks/finetune_stage*.ipynb` | Training pipeline reference | Only if reproducing training |
 | `python/inference.py` | Standalone Colab inference | Never — just run it |
 | `frontend/vite.config.ts` | Build config + GitHub Pages base path | Only if changing deploy target |
